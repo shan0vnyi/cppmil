@@ -1,3 +1,4 @@
+#include <string>
 #define ENABLE_DEBUG  0
 
 #if ENABLE_DEBUG
@@ -53,7 +54,7 @@ long parse_long(const char* text) {
     const long value = std::strtol(text, &end, 10);
 
     if (end == text) {
-        throw std::invalid_argument("Invalid long value");
+        throw std::invalid_argument(std::string("invalid long value: ") + text);
     }
 
     return value;
@@ -68,7 +69,7 @@ double parse_double(const char* text) {
     const double value = std::strtod(text, &end);
 
     if (end == text) {
-        throw std::invalid_argument("Invalid double value");
+        throw std::invalid_argument(std::string("invalid double value: ") + text);
     }
 
     return value;
@@ -79,7 +80,7 @@ Frame parse_frame(char line[]) {
     const int field_count = split_line(line, fields, EXPECTED_FIELD_COUNT);
 
     if (field_count != EXPECTED_FIELD_COUNT) {
-        throw std::runtime_error("Invalid fields count");
+        throw std::runtime_error("expected " + std::to_string(EXPECTED_FIELD_COUNT)+ " fields");
     }
 
     DEBUG("f0 [" << fields[0] << "]; f1 ["<< fields[1]
@@ -105,7 +106,7 @@ double compute_frame_rate_hz(const Frame frames[], int frame_count) {
     const long elapsed_ms = frames[frame_count - 1].timestamp_ms - frames[0].timestamp_ms;
 
     if (elapsed_ms == 0) {
-        std::cerr << "error: invalid frames period" << std::endl;
+        throw std::runtime_error("invalid frames period");
     } else {
         rate = static_cast<double>((frame_count - 1) * 1000 / elapsed_ms);
     }
@@ -116,8 +117,7 @@ double compute_frame_rate_hz(const Frame frames[], int frame_count) {
 int read_frames(const char* path, Frame frames[], int max_frames) {
     std::ifstream input{path};
     if (!input) {
-        std::cerr << "error: failed to open input file: " << path << '\n';
-        return 0;
+        throw std::runtime_error(std::string("failed to open input file: ") + path);
     }
 
     int frame_count = 0;
@@ -131,11 +131,22 @@ int read_frames(const char* path, Frame frames[], int max_frames) {
         if (frame_count < max_frames) {
             try {
                 frames[frame_count] = parse_frame(line);
+
+                if (frame_count > 0) {
+                    if (frames[frame_count - 1].timestamp_ms >= frames[frame_count].timestamp_ms) {
+                        throw std::runtime_error("invalid timestamp " + std::to_string(frames[frame_count].timestamp_ms));
+                    }
+                }
+
+                ++frame_count;
             } catch (const std::exception& ex) {
-                std::cerr << "error: " << ex.what() << std::endl;
+                throw std::runtime_error("invalid frame at line " + std::to_string(frame_count + 1) + ": " + ex.what());
             }
-            ++frame_count;
         }
+    }
+
+    if (frame_count == 0) {
+        throw std::runtime_error("empty frames");
     }
 
     return frame_count;

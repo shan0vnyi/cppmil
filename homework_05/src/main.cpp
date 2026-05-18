@@ -9,14 +9,14 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    Frame frames[MAX_TELEMETRY_FRAMES];
-    const int frame_count = read_frames(argv[1], frames, MAX_TELEMETRY_FRAMES);
-
-    if (frame_count > 0) {
+    try {
+        Frame frames[MAX_TELEMETRY_FRAMES];
+        const int frame_count = read_frames(argv[1], frames, MAX_TELEMETRY_FRAMES);
         const Summary summary = summarize(frames, frame_count);
         print_summary(summary);
-    } else {
-        std::cerr << "Frames not found" << std::endl;
+    } catch (const std::exception& ex) {
+        std::cerr << "error: " << ex.what() << "\n";
+        return 1;
     }
 
     return 0;
