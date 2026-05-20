@@ -26,6 +26,26 @@
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/aarch64-linux-gnu.cmake"
       }
+    },
+    {
+      "name": "release",
+      "displayName": "Release",
+      "description": "Продакшн версія",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "relwithdebinfo",
+      "displayName": "RelWithDebInfo",
+      "description": "Преродакшн версія з можливістю відладки",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/relwithdebinfo",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      }
     }
   ],
   "buildPresets": [
@@ -40,6 +60,18 @@
       "displayName": "Build ARM64 Debug",
       "description": "Зібрати ARM64 debug preset після cross-configure.",
       "configurePreset": "aarch64-debug"
+    },
+    {
+      "name": "release",
+      "displayName": "Build Release",
+      "description": "Зібрати release preset після configure.",
+      "configurePreset": "release"
+    },
+    {
+      "name": "relwithdebinfo",
+      "displayName": "Build release with debug info",
+      "description": "Зібрати release з debug info preset після configure.",
+      "configurePreset": "relwithdebinfo"
     }
   ]
 }

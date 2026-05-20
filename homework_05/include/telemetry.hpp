@@ -12,6 +12,11 @@ struct Frame {
     double temperature_c;
     int gps_fix;
     int satellites;
+    bool isSet = false;
+
+    bool isEmpty() const {
+        return isSet == false;
+    }
 };
 
 // Aggregated values printed by the executable.
