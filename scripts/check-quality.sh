@@ -25,7 +25,7 @@ build() {
 
 format() {
     clang-format -style=file:.devcontainer/.clang-format -i "${CXX_FILES[@]}"
-    cmake-format --config-file .devconaiter/.cmake-format.json -i "${CMAKE_FILES[@]}"
+    cmake-format --config-file .devcontainer/.cmake-format.json -i "${CMAKE_FILES[@]}"
 }
 
 test_all() {
