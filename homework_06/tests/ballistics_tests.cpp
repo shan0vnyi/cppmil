@@ -14,8 +14,10 @@ TEST(Ballistics, ComputesKnownDropPoint)
                               .ammo_name = "VOG-17"};
 
   const auto solution = computeDropSolution(input);
+  // NOLINTBEGIN(bugprone-unchecked-optional-access) for tests purposes
   EXPECT_NEAR(solution->drop_x, 173.759, 0.01);
   EXPECT_NEAR(solution->drop_y, 173.759, 0.01);
+  // NOLINTEND(bugprone-unchecked-optional-access) for tests purposes
 }
 
 TEST(Ballistics, ComputesKnownDropPointWithIntermediatePoint)
@@ -30,11 +32,13 @@ TEST(Ballistics, ComputesKnownDropPointWithIntermediatePoint)
                               .ammo_name = "VOG-17"};
 
   const auto solution = computeDropSolution(input);
+  // NOLINTBEGIN(bugprone-unchecked-optional-access) for tests purposes
   EXPECT_EQ(solution->requires_maneuver, true);
   EXPECT_NEAR(solution->drop_x, 173.759, 0.01);
   EXPECT_NEAR(solution->drop_y, 173.759, 0.01);
   EXPECT_NEAR(solution->intermediate_x, 166.688, 0.01);
   EXPECT_NEAR(solution->intermediate_y, 166.688, 0.01);
+  // NOLINTEND(bugprone-unchecked-optional-access) for tests purposes
 }
 
 TEST(Ballistics, UnknownAmmo)

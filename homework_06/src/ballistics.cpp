@@ -8,17 +8,15 @@
 
 #include "ballistics.hpp"
 
-#include <algorithm>
 #include <optional>
 #include <array>
 #include <cmath>
-#define _USE_MATH_DEFINES
+#define USE_MATH_DEFINES
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <cstring>
-#include <stdexcept>
 
 // Global vars
 const float g{9.81f};
@@ -47,39 +45,48 @@ Ammo getAmmo(const std::string& name)
   return ammo;
 }
 
-float calcFallTime(const Ammo& ammo, const float& h, const float& speed)
+double calcFallTime(const double& h, const Ammo& ammo, const double& speed)
 {
-  float a = ammo.drag * g * ammo.mass - 2 * pow(ammo.drag, 2) * ammo.lift * speed;
-  float b = -3 * g * pow(ammo.mass, 2) + 3 * ammo.drag * ammo.lift * ammo.mass * speed;
-  float m2 = pow(ammo.mass, 2);
-  float c = 6 * m2 * h;
-  float p = -pow(b, 2) / (3 * pow(a, 2));
-  float q = (2 * pow(b, 3)) / (27 * pow(a, 3)) + c / a;
-  float phi = acos((3 * q) / (2 * p) * sqrt(-3 / p));
-  float t = 2 * sqrt(-p / 3) * cos((phi + 4 * M_PI) / 3) - b / (3 * a);
+  double a = ammo.drag * g * ammo.mass - 2 * (ammo.drag * ammo.drag) * ammo.lift * speed;
+  double b = -3 * g * (ammo.mass * ammo.mass) + 3 * ammo.drag * ammo.lift * ammo.mass * speed;
+  double c = 6 * (ammo.mass * ammo.mass) * h;
+  double p = -(b * b) / (3 * (a * a));
+  double q = (2 * (b * b * b)) / (27 * (a * a * a)) + c / a;
+  double phi = std::acos((3 * q) / (2 * p) * std::sqrt(-3 / p));
+  double t = 2 * std::sqrt(-p / 3) * cos((phi + 4 * M_PI) / 3) - b / (3 * a);
 
   return t;
 }
 
-float calcFallDistance(const Ammo& ammo, const float& t, const float& speed)
+double calcFallDistance(const Ammo& ammo, const double& t, const double& speed)
 {
-  float h = speed * t - pow(t, 2) * ammo.drag * speed / (2 * ammo.mass) +
-            pow(t, 3) * (6 * ammo.drag * g * ammo.lift * ammo.mass - 6 * pow(ammo.drag, 2) * (pow(ammo.lift, 2) - 1) * speed) /
-              (36 * pow(ammo.mass, 2)) +
+  const double dragP2 = ammo.drag * ammo.drag;
+  const double dragP3 = ammo.drag * ammo.drag * ammo.drag;
+  const double dragP4 = ammo.drag * ammo.drag * ammo.drag * ammo.drag;
+  const double liftP2 = ammo.lift * ammo.lift;
+  const double liftP3 = ammo.lift * ammo.lift * ammo.lift;
+  const double liftP4 = ammo.lift * ammo.lift * ammo.lift * ammo.lift;
+  const double massP2 = ammo.mass * ammo.mass;
+  const double massP3 = ammo.mass * ammo.mass * ammo.mass;
+  const double massP4 = ammo.mass * ammo.mass * ammo.mass * ammo.mass;
+
+  double h = speed * t - (t * t) * ammo.drag * speed / (2 * ammo.mass) +
+            (t * t * t) * (6 * ammo.drag * g * ammo.lift * ammo.mass - 6 * dragP2 * (liftP2 - 1) * speed) /
+              (36 * massP2) +
             pow(t, 4) *
-              (-6 * pow(ammo.drag, 2) * g * ammo.lift * (1 + pow(ammo.lift, 2) + pow(ammo.lift, 4)) * ammo.mass +
-               3 * pow(ammo.drag, 3) * pow(ammo.lift, 2) * (1 + pow(ammo.lift, 2)) * speed +
-               6 * pow(ammo.drag, 3) * pow(ammo.lift, 4) * (1 + pow(ammo.lift, 2)) * speed) /
-              (36 * pow(1 + pow(ammo.lift, 2), 2) * pow(ammo.mass, 3)) +
+              (-6 * dragP2 * g * ammo.lift * (1 + liftP2 + liftP4) * ammo.mass +
+               3 * dragP3 * liftP2 * (1 + liftP2) * speed +
+               6 * dragP3 * liftP4 * (1 + liftP2) * speed) /
+              (36 * pow(1 + liftP2, 2) * massP3) +
             pow(t, 5) *
-              (3 * pow(ammo.drag, 3) * g * pow(ammo.lift, 3) * ammo.mass -
-               3 * pow(ammo.drag, 4) * pow(ammo.lift, 2) * (1 + pow(ammo.lift, 2)) * speed) /
-              (36 * (1 + pow(ammo.lift, 2)) * pow(ammo.mass, 4));
+              (3 * dragP3 * g * liftP3 * ammo.mass -
+               3 * dragP4 * liftP2 * (1 + liftP2) * speed) /
+              (36 * (1 + liftP2) * massP4);
 
   return h;
 }
 
-double calcDistanceBtwPoints(const float& x1, const float& y1, const float& x2, const float& y2)
+double calcDistanceBtwPoints(const double& x1, const double& y1, const double& x2, const double& y2)
 {
   return hypot(x2 - x1, y2 - y1);
 }
@@ -121,6 +128,8 @@ std::optional<BallisticsInput> readBallisticsInput(const std::string& path)
       case 7:
         file >> input.ammo_name;
         break;
+      default:
+        break;
     }
 
     if (file.eof() && i != (INPUT_FIELDS_COUNT - 1)) {
@@ -152,8 +161,8 @@ std::optional<DropSolution> computeDropSolution(const BallisticsInput& input)
   }
 
   DropSolution result{};
-  float fallTime = calcFallTime(bomb, input.drone_z, input.attack_speed_mps);
-  float fallDistance = calcFallDistance(bomb, fallTime, input.attack_speed_mps);
+  double fallTime = calcFallTime(input.drone_z, bomb, input.attack_speed_mps);
+  double fallDistance = calcFallDistance(bomb, fallTime, input.attack_speed_mps);
   std::cout << "Fall time is: [" << fallTime << "]; " << " Fall dist is: [" << fallDistance << "];\n";
 
   if (fallDistance < goesToZero) {
@@ -161,10 +170,10 @@ std::optional<DropSolution> computeDropSolution(const BallisticsInput& input)
     return std::nullopt;
   }
   else {
-    float drone_x{input.drone_x}, drone_y{input.drone_y};
+    double drone_x{input.drone_x}, drone_y{input.drone_y};
     result.flight_time_s = fallTime;
     result.lead_distance_m = fallDistance;
-    float flightDistance = calcDistanceBtwPoints(drone_x, drone_y, input.target_x, input.target_y);
+    double flightDistance = calcDistanceBtwPoints(drone_x, drone_y, input.target_x, input.target_y);
     DEBUG("FD1 is [" << flightDistance << "]\n");
     // Dron and target have same coordinates
     if (flightDistance < goesToZero) {
@@ -192,7 +201,7 @@ std::optional<DropSolution> computeDropSolution(const BallisticsInput& input)
       DEBUG("FD3 is [" << flightDistance << "]\n");
     }
 
-    float ratio = (flightDistance - fallDistance) / flightDistance;
+    double ratio = (flightDistance - fallDistance) / flightDistance;
     result.drop_x = drone_x + (input.target_x - drone_x) * ratio;
     result.drop_y = drone_y + (input.target_y - drone_y) * ratio;
   }

@@ -3,12 +3,6 @@
 #include <string>
 #include <optional>
 
-struct Coord {
-  float x{0.0f};
-  float y{0.0f};
-  float z{0.0f};
-};
-
 struct Ammo {
   float mass{0.0f};
   float drag{0.0f};
@@ -18,13 +12,13 @@ struct Ammo {
 };
 
 struct BallisticsInput {
-  float drone_x{0.0f};
-  float drone_y{0.0f};
-  float drone_z{0.0f};
-  float target_x{0.0f};
-  float target_y{0.0f};
-  float attack_speed_mps{0.0f};
-  float acceleration_path_m{0.0f};
+  double drone_x{0.0};
+  double drone_y{0.0};
+  double drone_z{0.0};
+  double target_x{0.0};
+  double target_y{0.0};
+  double attack_speed_mps{0.0};
+  double acceleration_path_m{0.0};
   std::string ammo_name{};
   bool filled{false};
 
@@ -41,12 +35,12 @@ struct BallisticsInput {
 };
 
 struct DropSolution {
-  float drop_x{0.0f};
-  float drop_y{0.0f};
-  float intermediate_x{0.0f};
-  float intermediate_y{0.0f};
-  float flight_time_s{0.0f};
-  float lead_distance_m{0.0f};
+  double drop_x{0.0f};
+  double drop_y{0.0f};
+  double intermediate_x{0.0f};
+  double intermediate_y{0.0f};
+  double flight_time_s{0.0f};
+  double lead_distance_m{0.0f};
   bool requires_maneuver{false};
 };
 

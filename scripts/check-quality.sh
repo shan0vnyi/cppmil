@@ -34,12 +34,11 @@ test_all() {
 }
 
 lint() {
-    set -x
     build
     local report_dir="build/debug/reports"
     local raw_report="${report_dir}/clang-tidy.raw.txt"
-    local report="${report_dir}/clang-tidy.txt"
-    local diagnostics="${report_dir}/clang-tidy.diagnostics.txt"
+    # local report="${report_dir}/clang-tidy.txt"
+    # local diagnostics="${report_dir}/clang-tidy.diagnostics.txt"
 
     mkdir -p "${report_dir}"
 
@@ -49,6 +48,5 @@ lint() {
         homework_06/src/ballistics.cpp \
         homework_06/src/main.cpp \
         homework_06/tests/ballistics_tests.cpp > "${raw_report}" 2>1
-    set +x
 }
 "$@"
