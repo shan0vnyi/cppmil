@@ -71,17 +71,12 @@ double calcFallDistance(const Ammo& ammo, const double& t, const double& speed)
   const double massP4 = ammo.mass * ammo.mass * ammo.mass * ammo.mass;
 
   double h = speed * t - (t * t) * ammo.drag * speed / (2 * ammo.mass) +
-            (t * t * t) * (6 * ammo.drag * g * ammo.lift * ammo.mass - 6 * dragP2 * (liftP2 - 1) * speed) /
-              (36 * massP2) +
-            pow(t, 4) *
-              (-6 * dragP2 * g * ammo.lift * (1 + liftP2 + liftP4) * ammo.mass +
-               3 * dragP3 * liftP2 * (1 + liftP2) * speed +
-               6 * dragP3 * liftP4 * (1 + liftP2) * speed) /
-              (36 * pow(1 + liftP2, 2) * massP3) +
-            pow(t, 5) *
-              (3 * dragP3 * g * liftP3 * ammo.mass -
-               3 * dragP4 * liftP2 * (1 + liftP2) * speed) /
-              (36 * (1 + liftP2) * massP4);
+             (t * t * t) * (6 * ammo.drag * g * ammo.lift * ammo.mass - 6 * dragP2 * (liftP2 - 1) * speed) / (36 * massP2) +
+             pow(t, 4) *
+               (-6 * dragP2 * g * ammo.lift * (1 + liftP2 + liftP4) * ammo.mass + 3 * dragP3 * liftP2 * (1 + liftP2) * speed +
+                6 * dragP3 * liftP4 * (1 + liftP2) * speed) /
+               (36 * pow(1 + liftP2, 2) * massP3) +
+             pow(t, 5) * (3 * dragP3 * g * liftP3 * ammo.mass - 3 * dragP4 * liftP2 * (1 + liftP2) * speed) / (36 * (1 + liftP2) * massP4);
 
   return h;
 }
@@ -163,7 +158,6 @@ std::optional<DropSolution> computeDropSolution(const BallisticsInput& input)
   DropSolution result{};
   double fallTime = calcFallTime(input.drone_z, bomb, input.attack_speed_mps);
   double fallDistance = calcFallDistance(bomb, fallTime, input.attack_speed_mps);
-  std::cout << "Fall time is: [" << fallTime << "]; " << " Fall dist is: [" << fallDistance << "];\n";
 
   if (fallDistance < goesToZero) {
     std::cerr << "error: invalid horizontal fall distance [" << fallDistance << "]\n";
